@@ -4,6 +4,8 @@
 #include <array>
 #include "gameboard.hpp"
 
+using namespace std;
+
 /**
  * @enum MainMenuStatusFlag
  * @brief Enumeration of possible main menu status flags.
@@ -26,7 +28,7 @@ enum MainMenuStatusFlag {
  * 
  * This type represents an array of boolean values corresponding to each main menu status flag.
  */
-using mainmenustatus_t = std::array<bool, MAX_NO_MAIN_MENU_STATUS_FLAGS>;
+using mainmenustatus_t = array<bool, MAX_NO_MAIN_MENU_STATUS_FLAGS>;
 
 /**
  * @var mainmenustatus
@@ -37,9 +39,9 @@ using mainmenustatus_t = std::array<bool, MAX_NO_MAIN_MENU_STATUS_FLAGS>;
  */
 extern mainmenustatus_t mainmenustatus;
 
-std::vector<std::string> listSavedGameStates(const std::string& directory);
+vector<string> listSavedGameStates(const string& directory);
 
-std::string chooseGameState(const std::vector<std::string>& gamestate);
+string chooseGameState(const vector<string>& gamestate);
 
 namespace Menu {
 void startMenu();

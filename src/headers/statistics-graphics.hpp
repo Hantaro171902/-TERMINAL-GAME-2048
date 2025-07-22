@@ -4,15 +4,17 @@
 #include <string>
 #include <tuple>
 
+using namespace std;
+
 namespace Statistics {
 namespace Graphics {
-std::string AskForPlayerNamePrompt();
-std::string MessageScoreSavedPrompt();
+string AskForPlayerNamePrompt();
+string MessageScoreSavedPrompt();
 
 using total_stats_display_data_t =
-    std::tuple<bool, std::string, std::string, std::string, std::string,
-               std::string>;
-std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd);
+    tuple<bool, string, string, string, string,
+               string>;
+string TotalStatisticsOverlay(total_stats_display_data_t tsdd);
 } // namespace Graphics
 } // namespace Statistics
 

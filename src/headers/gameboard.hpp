@@ -5,13 +5,15 @@
 #include <tuple>
 #include <vector>
 
+using namespace std;
+
 struct point2D_t;
 
 namespace Game {
 
 struct GameBoard {
-  using tile_data_array_t = std::vector<tile_t>;
-  using gameboard_data_array_t = std::tuple<size_t, tile_data_array_t>;
+  using tile_data_array_t = vector<tile_t>;
+  using gameboard_data_array_t = tuple<size_t, tile_data_array_t>;
 
   gameboard_data_array_t gbda;
   bool win{};
@@ -42,7 +44,7 @@ void tumbleTilesDownOnGameboard(GameBoard &gb);
 void tumbleTilesLeftOnGameboard(GameBoard &gb);
 void tumbleTilesRightOnGameboard(GameBoard &gb);
 
-std::string printStateOfGameBoard(GameBoard gb);
+string printStateOfGameBoard(GameBoard gb);
 
 } // namespace Game
 

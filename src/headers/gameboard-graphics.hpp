@@ -3,11 +3,13 @@
 
 #include <string>
 
+using namespace std;
+
 namespace Game {
 struct GameBoard;
 namespace Gameboard {
 namespace Graphics {
-std::string GameBoardTextOutput(GameBoard gb);
+string GameBoardTextOutput(GameBoard gb);
 
 }
 } // namespace Gameboard

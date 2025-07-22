@@ -6,6 +6,8 @@
 #include <string>
 #include <tuple>
 
+using namespace std;
+
 namespace Scoreboard {
 struct Score;
 }
@@ -19,16 +21,16 @@ struct total_game_stats_t {
   int winCount{};
 };
 
-using load_stats_status_t = std::tuple<bool, total_game_stats_t>;
+using load_stats_status_t = tuple<bool, total_game_stats_t>;
 
-load_stats_status_t loadFromFileStatistics(std::string filename);
+load_stats_status_t loadFromFileStatistics(string filename);
 ull load_game_best_score();
 void saveEndGameStats(Scoreboard::Score finalscore);
-void CreateFinalScoreAndEndGameDataFile(std::ostream &os, std::istream &is,
+void CreateFinalScoreAndEndGameDataFile(ostream &os, istream &is,
                                         Scoreboard::Score finalscore);
 } // namespace Statistics
 
-std::istream &operator>>(std::istream &is, Statistics::total_game_stats_t &s);
-std::ostream &operator<<(std::ostream &os, Statistics::total_game_stats_t &s);
+istream &operator>>(istream &is, Statistics::total_game_stats_t &s);
+ostream &operator<<(ostream &os, Statistics::total_game_stats_t &s);
 
 #endif

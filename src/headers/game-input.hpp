@@ -3,6 +3,8 @@
 
 #include <array>
 
+using namespace std;
+
 namespace Game {
 namespace Input {
 
@@ -60,7 +62,7 @@ enum IntendedMoveFlag {
   FLAG_MOVE_DOWN,
   MAX_NO_INTENDED_MOVE_FLAGS
 };
-using intendedmove_t = std::array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
+using intendedmove_t = array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
 
 bool check_input_ansi(char c, intendedmove_t &intendedmove);
 bool check_input_vim(char c, intendedmove_t &intendedmove);
