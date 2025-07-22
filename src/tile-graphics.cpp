@@ -12,7 +12,7 @@ namespace Game {
 namespace {
 
 Color::Modifier tileColor(ull value) {
-  vector<Color::Modifier> colors{lightBlue, lightYellow, yellow, red, green, lightRed,
+  vector<Color::Modifier> colors{lightBlue, magenta, yellow, red, green, white,
                                       red, green, cyan, blue, magenta};
   int log = log2(value);
   int index = log < 12 ? log - 1 : 10;

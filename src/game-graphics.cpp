@@ -21,8 +21,10 @@ string AsciiArt2048() {
         /\\\\\\\\\\\\\\\   \///\\\\\\\/              \/\\\      \///\\\\\\\\\/
         \///////////////      \///////                \///         \/////////
   )";
+
+
   ostringstream title_card_richtext;
-  title_card_richtext << green << bold_on << title_card_2048 << bold_off << def;
+  title_card_richtext << lightCyan << bold_on << title_card_2048 << bold_off << def;
   title_card_richtext << "\n\n\n";
   return title_card_richtext.str();
 }
@@ -250,7 +252,7 @@ string GameScoreBoardBox(scoreboard_display_data_t scdd) {
                         border_padding_char)
          << time_str << inner_border_padding << vertical_border_pattern
          << "\n";
-         
+
   str_os << outer_border_padding << bottom_board << "\n \n";
   return str_os.str();
 }

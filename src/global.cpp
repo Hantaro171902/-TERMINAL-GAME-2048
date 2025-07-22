@@ -62,7 +62,7 @@ void clearScreen() {
   system("cls");
 #else
   // system("clear");
-  cout << "\033[2J\033[1;1H";  // Clear screen + move to top-left
+  cout << "\033[3J\033[1;1H";  // Clear screen + scrollback + move to top-left
   cout << "\033[?25l";         // Hide cursor
 #endif
 };
