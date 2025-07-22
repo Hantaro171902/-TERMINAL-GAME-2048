@@ -61,7 +61,9 @@ void clearScreen() {
 #ifdef _WIN32
   system("cls");
 #else
-  system("clear");
+  // system("clear");
+  cout << "\033[2J\033[1;1H";  // Clear screen + move to top-left
+  cout << "\033[?25l";         // Hide cursor
 #endif
 };
 
