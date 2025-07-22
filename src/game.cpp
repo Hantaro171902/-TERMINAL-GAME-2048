@@ -259,13 +259,16 @@ receive_agent_input(Input::intendedmove_t intendedmove,
     char c;
     getKeypressDownInput(c);
     // Update agent's intended move flags per control scheme (if flagged).
-    const auto is_invalid_keypress_code = check_input_ansi(c, intendedmove) &&
-                                          check_input_wasd(c, intendedmove) &&
-                                          check_input_vim(c, intendedmove);
+    const auto is_invalid_keypress_code = 
+          check_input_ansi(c, intendedmove) ||
+          check_input_wasd(c, intendedmove) ||
+          check_input_vim(c, intendedmove);
+
     bool is_invalid_special_keypress_code;
     tie(is_invalid_special_keypress_code, gamestatus) =
         check_input_other(c, gamestatus);
-    if (is_invalid_keypress_code && is_invalid_special_keypress_code) {
+    
+    if (!is_invalid_keypress_code && !is_invalid_special_keypress_code) {
       gamestatus[FLAG_ONE_SHOT] = true;
       gamestatus[FLAG_INPUT_ERROR] = true;
     }
@@ -463,18 +466,23 @@ string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
 GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
                           GameBoard gb) {
   auto loop_again{true};
-  auto currentgamestatus =
-      make_tuple(currentBestScore, cm, gamestatus_t{}, gb);
-  // Monitor the loop to check if the current state is still set to GAME
-  // If not, then the M key was pressed, setting the current state to MENU
-  // Thus, we return to the menu
+  auto currentgamestatus = make_tuple(currentBestScore, cm, gamestatus_t{}, gb);
+  
+  auto startTime = chrono::high_resolution_clock::now();
+
   while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) || (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
-    tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
+      // Update duration before each frame
+      auto now = chrono::high_resolution_clock::now();
+      double elapsed = chrono::duration<double>(now - startTime).count();
+      get<3>(currentgamestatus).duration = elapsed;
+      
+      tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
+      
+      this_thread::sleep_for(chrono::milliseconds(100));
   }
 
-  DrawAlways(cout,
-             DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
-  return gb;
+  DrawAlways(cout, DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
+  return get<3>(currentgamestatus); // Return the updated GameBoard
 }
 
 Scoreboard::Score make_finalscore_from_game_session(double duration,
@@ -517,47 +525,14 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
     addTileOnGameboard(gb);
   }
 
-  auto startTime = chrono::high_resolution_clock::now();
   // Set stdin to non-blocking mode
   setNonBlockingStdin(true);
 
-  // Main game loop
-  auto loop_again = true;
-    auto currentgamestatus = make_tuple(bestScore, is_competition_mode, gamestatus_t{}, gb);
+  gb = endlessGameLoop(bestScore, is_competition_mode, gb);
 
-    while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) || 
-                          (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
-      // Update duration before each frame
-      auto now = chrono::high_resolution_clock::now();
-      double elapsed = chrono::duration<double>(now - startTime).count();
-      get<3>(currentgamestatus).duration = elapsed;
-      // Redraw screen with updated timer
-      DrawAlways(cout, DataSuppliment(currentgamestatus, drawGraphics));
-      // Check for input (non-blocking)
-      char c = 0;
-      if (read(STDIN_FILENO, &c, 1) > 0) {
-        // Process input
-        Input::intendedmove_t player_intendedmove{};
-        tie(player_intendedmove, get<2>(currentgamestatus)) =
-            receive_agent_input(player_intendedmove, get<2>(currentgamestatus));
-        tie(ignore, get<3>(currentgamestatus)) =
-            process_agent_input(player_intendedmove, get<3>(currentgamestatus));
-        
-            // Process game logic
-        auto [new_gamestatus, new_gb] = process_gamelogic(make_tuple(get<2>(currentgamestatus), get<3>(currentgamestatus)));
-        get<2>(currentgamestatus) = new_gamestatus;
-        get<3>(currentgamestatus) = new_gb;
+  setNonBlockingStdin(false); // Reset stdin to blocking mode
 
-        tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
-      }
-      this_thread::sleep_for(chrono::milliseconds(100));
-    }
-    setNonBlockingStdin(false); // Reset stdin to blocking mode
-
-
-    DrawAlways(cout, DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
-
-    gb = get<3>(currentgamestatus);
+  DrawAlways(cout, DataSuppliment(make_tuple(bestScore, is_competition_mode, gamestatus_t{}, gb), drawEndGameLoopGraphics));
 
   if (is_this_a_new_game) {
     const auto finalscore = make_finalscore_from_game_session(gb.duration, gb);
