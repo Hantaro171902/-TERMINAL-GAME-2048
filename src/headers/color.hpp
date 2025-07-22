@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 namespace Color {
 enum class Code {
   BOLD = 1,
@@ -28,6 +30,8 @@ enum class Code {
   FG_RED = 31,
   FG_WHITE = 97,
   FG_YELLOW = 33,
+  FG_ORANGE = 38,
+  FG_PINK = 95
 };
 
 class Modifier {
@@ -36,7 +40,7 @@ class Modifier {
 
 public:
   Modifier(Code pCode) : code(pCode) {}
-  friend std::ostream &operator<<(std::ostream &os, const Modifier &mod) {
+  friend ostream &operator<<(ostream &os, const Modifier &mod) {
     return os << "\033[" << static_cast<int>(mod.code) << "m";
   }
 };
@@ -46,9 +50,12 @@ public:
 static Color::Modifier bold_off(Color::Code::RESET);
 static Color::Modifier bold_on(Color::Code::BOLD);
 static Color::Modifier def(Color::Code::FG_DEFAULT);
+static Color::Modifier white(Color::Code::FG_WHITE);
+static Color::Modifier yellow(Color::Code::FG_YELLOW);
+static Color::Modifier orange(Color::Code::FG_ORANGE);
+static Color::Modifier pink(Color::Code::FG_PINK);
 static Color::Modifier red(Color::Code::FG_RED);
 static Color::Modifier green(Color::Code::FG_GREEN);
-static Color::Modifier yellow(Color::Code::FG_YELLOW);
 static Color::Modifier blue(Color::Code::FG_BLUE);
 static Color::Modifier magenta(Color::Code::FG_MAGENTA);
 static Color::Modifier cyan(Color::Code::FG_CYAN);
