@@ -133,8 +133,12 @@ string BoardSizeErrorPrompt() {
 string InputCommandListPrompt() {
   constexpr auto sp = "  ";
   const auto input_commands_list_text = {
-      "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
-      "D or L or → => Right", "Z or P => Save", "M => Return to menu"};
+      "W K ↑ : Up", 
+      "A H ← : Left", 
+      "S J ↓ : Down",
+      "D L → : Right", 
+      "Z P   : Save", 
+      "M     : Return to menu"};
   ostringstream str_os;
   for (const auto txt : input_commands_list_text) {
     str_os << sp << txt << "\n";
@@ -168,6 +172,7 @@ string GameScoreBoardBox(scoreboard_display_data_t scdd) {
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
+  constexpr auto time_text_label = "TIME:";
 
   // * border padding: vvv
   // | l-outer: 2, r-outer: 0
@@ -198,6 +203,7 @@ string GameScoreBoardBox(scoreboard_display_data_t scdd) {
     IDX_GAMEBOARD_SCORE,
     IDX_BESTSCORE,
     IDX_MOVECOUNT,
+    IDX_TIME_STR, 
     MAX_SCOREBOARDDISPLAYDATA_INDEXES
   };
 
@@ -205,6 +211,7 @@ string GameScoreBoardBox(scoreboard_display_data_t scdd) {
   const auto gameboard_score = get<IDX_GAMEBOARD_SCORE>(scdd);
   const auto temp_bestscore = get<IDX_BESTSCORE>(scdd);
   const auto movecount = get<IDX_MOVECOUNT>(scdd);
+  const auto time_str = get<IDX_TIME_STR>(scdd); // Placeholder for time string
 
   str_os << outer_border_padding << top_board << "\n";
   str_os << outer_border_padding << vertical_border_pattern
@@ -234,6 +241,16 @@ string GameScoreBoardBox(scoreboard_display_data_t scdd) {
                         border_padding_char)
          << movecount << inner_border_padding << vertical_border_pattern
          << "\n";
+  // Add time string to the scoreboard
+  str_os << outer_border_padding << vertical_border_pattern
+         << inner_border_padding << bold_on << time_text_label << bold_off
+         << string(inner_padding_length -
+                            string{time_text_label}.length() -
+                            time_str.length(),
+                        border_padding_char)
+         << time_str << inner_border_padding << vertical_border_pattern
+         << "\n";
+         
   str_os << outer_border_padding << bottom_board << "\n \n";
   return str_os.str();
 }

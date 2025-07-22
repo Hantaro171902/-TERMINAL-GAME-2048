@@ -2,6 +2,9 @@
 #include "color.hpp"
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+
+using namespace std;
 
 #ifdef _WIN32
 
@@ -60,19 +63,11 @@ void clearScreen() {
 };
 
 string secondsFormat(double sec) {
-  double s = sec;
-  int m = s / 60;
-  s -= m * 60;
-  int h = m / 60;
-  m %= 60;
-  s = (int)s;
+  int total_seconds = static_cast<int>(sec);
+  int minutes = total_seconds / 60;
+  int seconds = total_seconds % 60;
   ostringstream oss;
-  if (h) {
-    oss << h << "h ";
-  }
-  if (m) {
-    oss << m << "m ";
-  }
-  oss << s << "s";
+  oss << setw(2) << setfill('0') << minutes << ":"
+      << setw(2) << setfill('0') << seconds;
   return oss.str();
 }

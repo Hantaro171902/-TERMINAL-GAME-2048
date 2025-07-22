@@ -21,12 +21,13 @@ struct GameBoard {
   ull score{};
   ull largestTile{2};
   long long moveCount{-1};
+  double duration{}; // Duration in seconds
 
   GameBoard() = default;
   explicit GameBoard(ull playsize);
   explicit GameBoard(ull playsize, tile_data_array_t prempt_board);
 };
-
+  
 size_t getPlaySizeOfGameboardDataArray(GameBoard::gameboard_data_array_t gbda);
 tile_t getTileOnGameboardDataArray(GameBoard::gameboard_data_array_t gbda,
                                    point2D_t pt);

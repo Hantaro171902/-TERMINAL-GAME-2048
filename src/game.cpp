@@ -15,6 +15,10 @@
 #include <iostream>
 #include <sstream>
 #include <random> // Required for generating random numbers/integers in the RemoveTiles() function.
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <thread>
 
 
 using namespace std;
@@ -104,9 +108,11 @@ make_scoreboard_display_data(ull bestScore, competition_mode_t cm,
   const auto tempBestScore = (bestScore < gb.score ? gb.score : bestScore);
   const auto comp_mode = cm;
   const auto movecount = MoveCountOnGameBoard(gb);
+  const auto time_str = secondsFormat(gb.duration);   // Format time as a string
+
   const auto scdd =
       make_tuple(comp_mode, to_string(gameboard_score),
-                      to_string(tempBestScore), to_string(movecount));
+                      to_string(tempBestScore), to_string(movecount), time_str);
   return scdd;
 };
 
@@ -491,6 +497,15 @@ void DoPostGameSaveStuff(Scoreboard::Score finalscore, competition_mode_t cm) {
 
 } // namespace
 
+// Helper to set stdin to non-blocking mode
+void setNonBlockingStdin(bool enable) {
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    if (enable)
+        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+    else
+        fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
+}
+
 void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   const auto is_this_a_new_game = (cont == PlayGameFlag::BrandNewGame);
   const auto is_competition_mode =
@@ -502,14 +517,50 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
     addTileOnGameboard(gb);
   }
 
-  const auto startTime = chrono::high_resolution_clock::now();
-  gb = endlessGameLoop(bestScore, is_competition_mode, gb);
-  const auto finishTime = chrono::high_resolution_clock::now();
-  const chrono::duration<double> elapsed = finishTime - startTime;
-  const auto duration = elapsed.count();
+  auto startTime = chrono::high_resolution_clock::now();
+  // Set stdin to non-blocking mode
+  setNonBlockingStdin(true);
+
+  // Main game loop
+  auto loop_again = true;
+    auto currentgamestatus = make_tuple(bestScore, is_competition_mode, gamestatus_t{}, gb);
+
+    while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) || 
+                          (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
+      // Update duration before each frame
+      auto now = chrono::high_resolution_clock::now();
+      double elapsed = chrono::duration<double>(now - startTime).count();
+      get<3>(currentgamestatus).duration = elapsed;
+      // Redraw screen with updated timer
+      DrawAlways(cout, DataSuppliment(currentgamestatus, drawGraphics));
+      // Check for input (non-blocking)
+      char c = 0;
+      if (read(STDIN_FILENO, &c, 1) > 0) {
+        // Process input
+        Input::intendedmove_t player_intendedmove{};
+        tie(player_intendedmove, get<2>(currentgamestatus)) =
+            receive_agent_input(player_intendedmove, get<2>(currentgamestatus));
+        tie(ignore, get<3>(currentgamestatus)) =
+            process_agent_input(player_intendedmove, get<3>(currentgamestatus));
+        
+            // Process game logic
+        auto [new_gamestatus, new_gb] = process_gamelogic(make_tuple(get<2>(currentgamestatus), get<3>(currentgamestatus)));
+        get<2>(currentgamestatus) = new_gamestatus;
+        get<3>(currentgamestatus) = new_gb;
+
+        tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
+      }
+      this_thread::sleep_for(chrono::milliseconds(100));
+    }
+    setNonBlockingStdin(false); // Reset stdin to blocking mode
+
+
+    DrawAlways(cout, DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
+
+    gb = get<3>(currentgamestatus);
 
   if (is_this_a_new_game) {
-    const auto finalscore = make_finalscore_from_game_session(duration, gb);
+    const auto finalscore = make_finalscore_from_game_session(gb.duration, gb);
     DoPostGameSaveStuff(finalscore, is_competition_mode);
   }
 }

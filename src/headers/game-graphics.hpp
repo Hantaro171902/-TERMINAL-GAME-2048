@@ -28,7 +28,7 @@ string InputCommandListPrompt();
 string EndlessModeCommandListPrompt();
 string InputCommandListFooterPrompt();
 using scoreboard_display_data_t =
-  tuple<bool, string, string, string>;
+  tuple<bool, string, string, string, string>;
   string GameScoreBoardBox(scoreboard_display_data_t scdd);
   string GameScoreBoardOverlay(scoreboard_display_data_t scdd);
   using end_screen_display_data_t = tuple<bool, bool>;
