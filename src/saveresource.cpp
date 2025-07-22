@@ -3,6 +3,8 @@
 #include <fstream>
 #include <filesystem>
 
+
+using namespace std;
 namespace Game {
 namespace Saver {
 namespace {
@@ -20,9 +22,9 @@ namespace {
  * 
  * @note The ']' character is used to signify the end of the statistics data.
  */
-bool generateFilefromPreviousGameStatisticsData(std::ostream &os,
+bool generateFilefromPreviousGameStatisticsData(ostream &os,
                                                 const GameBoard &gb) {
-  os << gb.score << ":" << MoveCountOnGameBoard(gb) << "]" << std::endl;
+  os << gb.score << ":" << MoveCountOnGameBoard(gb) << "]" << endl;
   return true;
 }
 
@@ -36,7 +38,7 @@ bool generateFilefromPreviousGameStatisticsData(std::ostream &os,
  * @param gb The game board containing the state to be saved.
  * @return bool Returns true after successfully writing the state data.
  */
-bool generateFilefromPreviousGameStateData(std::ostream &os,
+bool generateFilefromPreviousGameStateData(ostream &os,
                                            const GameBoard &gb) {
   os << printStateOfGameBoard(gb);
   return true;
@@ -51,9 +53,9 @@ bool generateFilefromPreviousGameStateData(std::ostream &os,
  * @param filename The name of the file where the game state and statistics will be saved.
  * @param gb The game board containing the state and statistics to be saved.
  */
-void saveToFilePreviousGameStateData(std::string filename,
+void saveToFilePreviousGameStateData(string filename,
                                      const GameBoard &gb) {
-  std::ofstream stateFile(filename, std::ios_base::app);
+  ofstream stateFile(filename, ios_base::app);
   generateFilefromPreviousGameStateData(stateFile, gb);
   generateFilefromPreviousGameStatisticsData(stateFile, gb);
 
@@ -63,9 +65,9 @@ void saveToFilePreviousGameStateData(std::string filename,
 // The functionality to save game statistics has been integrated
 // into the saveToFilePreviousGameStateData function, making this
 // function redundant.
-/*void saveToFilePreviousGameStatisticsData(std::string filename,
+/*void saveToFilePreviousGameStatisticsData(string filename,
                                           const GameBoard &gb) {
-  std::ofstream stats(filename, std::ios_base::app);
+  ofstream stats(filename, ios_base::app);
   generateFilefromPreviousGameStatisticsData(stats, gb);
 }*/
 
@@ -87,16 +89,16 @@ void saveToFilePreviousGameStateData(std::string filename,
  * @note If the directory does not exist, it will be created. Ensure that the application
  *       has the necessary permissions to write to the specified location.
  */
-void saveGamePlayState(GameBoard gb, const std::string& filename) {
-  std::filesystem::path directory_path = "../data/SavedGameFiles/";
+void saveGamePlayState(GameBoard gb, const string& filename) {
+  filesystem::path directory_path = "../data/SavedGameFiles/";
 
-  if (!std::filesystem::exists(directory_path))
+  if (!filesystem::exists(directory_path))
   {
-    std::filesystem::create_directories(directory_path);
+    filesystem::create_directories(directory_path);
   }
 
   const auto path_to_file_gd_state = "../data/SavedGameFiles/" + filename;
-  std::remove(path_to_file_gd_state.c_str());
+  remove(path_to_file_gd_state.c_str());
 
   saveToFilePreviousGameStateData(path_to_file_gd_state, gb);
 }

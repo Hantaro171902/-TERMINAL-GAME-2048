@@ -11,6 +11,8 @@
 #include <limits>
 #include <sstream>
 
+using namespace std;
+
 namespace Game {
 
 namespace PreGameSetup {
@@ -25,7 +27,7 @@ enum PreGameSetupStatusFlag {
 };
 
 using pregamesetup_status_t =
-    std::array<bool, MAX_NO_PREGAME_SETUP_STATUS_FLAGS>;
+    array<bool, MAX_NO_PREGAME_SETUP_STATUS_FLAGS>;
 
 pregamesetup_status_t pregamesetup_status{};
 
@@ -43,18 +45,18 @@ void process_PreGameMenu() {
   }
 }
 
-int Receive_Input_Playsize(std::istream &is) {
+int Receive_Input_Playsize(istream &is) {
   int userInput_PlaySize{};
   if (!(is >> userInput_PlaySize)) {
     constexpr auto INVALID_INPUT_VALUE_FLAG = -1;
     userInput_PlaySize = INVALID_INPUT_VALUE_FLAG;
     is.clear();
-    is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    is.ignore(numeric_limits<streamsize>::max(), '\n');
   }
   return userInput_PlaySize;
 }
 
-void receive_input_flags(std::istream &is) {
+void receive_input_flags(istream &is) {
   using namespace Input::Keypress::Code;
 
   // Reset ErrornousChoice flag...
@@ -94,7 +96,7 @@ void receive_input_flags(std::istream &is) {
 bool soloLoop() {
   bool invalidInputValue = FlagInputErrornousChoice;
   const auto QuestionAboutBoardSizePrompt = [&invalidInputValue]() {
-    std::ostringstream str_os;
+    ostringstream str_os;
     // Prints only if "invalidInputValue" is true
     DrawOnlyWhen(str_os, invalidInputValue, Graphics::BoardSizeErrorPrompt);
     DrawAlways(str_os, Graphics::BoardInputPrompt);
@@ -104,11 +106,11 @@ bool soloLoop() {
   pregamesetup_status = pregamesetup_status_t{};
 
   clearScreen();
-  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
-  DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
-  DrawAlways(std::cout, QuestionAboutBoardSizePrompt);
+  DrawAlways(cout, Game::Graphics::AsciiArt2048);
+  DrawAsOneTimeFlag(cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
+  DrawAlways(cout, QuestionAboutBoardSizePrompt);
 
-  receive_input_flags(std::cin);
+  receive_input_flags(cin);
   process_PreGameMenu();
   return FlagInputErrornousChoice;
 }
@@ -136,13 +138,13 @@ void SetUpNewGame(NewGameFlag ns) {
  * @param filename The name of the file from which to read the game data.
  * @return A tuple containing a boolean indicating the success of the load operation and the initialized GameBoard object.
  */
-load_gameboard_status_t initialiseContinueBoardArray(const std::string& filename)
+load_gameboard_status_t initialiseContinueBoardArray(const string& filename)
 {
   using namespace Loader;
  // const auto gameboard_data_filename = "../data/" + filename;
   auto gb = GameBoard{1};
   auto loaded_game = load_game(filename, gb);
-  return std::make_tuple(loaded_game, gb);
+  return make_tuple(loaded_game, gb);
 }
 
 
@@ -155,10 +157,10 @@ load_gameboard_status_t initialiseContinueBoardArray(const std::string& filename
  * 
  * @param filename The name of the file from which to load the previous game state.
  */
-void DoContinueOldGame(const std::string& filename) {
+void DoContinueOldGame(const string& filename) {
   bool load_old_game_ok;
   GameBoard oldGameBoard;
-  std::tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray(filename);
+  tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray(filename);
   if (load_old_game_ok) {
     playGame(PlayGameFlag::ContinuePreviousGame, oldGameBoard);
   } else {
@@ -180,7 +182,7 @@ void SetUpNewGame() {
  * 
  * @param filename The name of the file containing the saved game to load.
  */
-void ContinueOldGame(const std::string& filename) {
+void ContinueOldGame(const string& filename) {
   DoContinueOldGame(filename);
 }
 

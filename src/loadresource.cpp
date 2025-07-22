@@ -10,6 +10,8 @@
 #include <tuple>
 #include <vector>
 
+using namespace std;
+
 namespace Game {
 namespace Loader {
 namespace {
@@ -24,19 +26,19 @@ namespace {
  * @param filename The name of the file to be read.
  * @return The number of lines read before encountering a line with '['. Returns -1 if the file cannot be opened.
  */
-int GetLines(std::string filename) 
+int GetLines(string filename) 
 {
-  std::ifstream stateFile(filename);
+  ifstream stateFile(filename);
   if (!stateFile) {
-      std::cerr << "Error. Cannot open the file: " << filename << std::endl;
+      cerr << "Error. Cannot open the file: " << filename << endl;
       return -1; // Return -1 to indicate an error
   }
 
-  std::string tempLine;
+  string tempLine;
   int noOfLines = 0;
 
-  while (std::getline(stateFile, tempLine)) {
-      if (tempLine.find('[') != std::string::npos) {
+  while (getline(stateFile, tempLine)) {
+      if (tempLine.find('[') != string::npos) {
           break; // Exit loop if '[' is found
       }
       noOfLines++;
@@ -57,26 +59,26 @@ int GetLines(std::string filename)
  * @param buf The input stream from which to read the tile data.
  * @return A vector of strings containing the extracted tile data.
  */
-std::vector<std::string> get_file_tile_data(std::istream &buf) {
-    std::vector<std::string> tempbuffer;
+vector<string> get_file_tile_data(istream &buf) {
+    vector<string> tempbuffer;
     enum { MAX_WIDTH = 10, MAX_HEIGHT = 10 };
     auto i{0};
 
-    for (std::string tempLine; std::getline(buf, tempLine) && i < MAX_WIDTH; i++) {
-        if (tempLine.find('[') != std::string::npos) {
+    for (string tempLine; getline(buf, tempLine) && i < MAX_WIDTH; i++) {
+        if (tempLine.find('[') != string::npos) {
             // Remove the '[' character and stop reading further
             tempLine = tempLine.substr(0, tempLine.find('['));
-            std::istringstream temp_filestream(tempLine);
+            istringstream temp_filestream(tempLine);
             auto j{0};
-            for (std::string a_word; std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
+            for (string a_word; getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
                 tempbuffer.push_back(a_word);
             }
             break; // Stop the outer loop as the end of tile data is reached
         }
 
-        std::istringstream temp_filestream(tempLine);
+        istringstream temp_filestream(tempLine);
         auto j{0};
-        for (std::string a_word; std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
+        for (string a_word; getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
             tempbuffer.push_back(a_word);
         }
     }
@@ -84,28 +86,28 @@ std::vector<std::string> get_file_tile_data(std::istream &buf) {
     return tempbuffer;
 }
 
-std::vector<tile_t>
-process_file_tile_string_data(std::vector<std::string> buf) {
-  std::vector<tile_t> result_buf;
+vector<tile_t>
+process_file_tile_string_data(vector<string> buf) {
+  vector<tile_t> result_buf;
   auto tile_processed_counter{0};
   const auto prime_tile_data =
-      [&tile_processed_counter](const std::string tile_data) {
+      [&tile_processed_counter](const string tile_data) {
         enum FieldIndex { IDX_TILE_VALUE, IDX_TILE_BLOCKED, MAX_NO_TILE_IDXS };
-        std::array<int, MAX_NO_TILE_IDXS> tile_internal{};
-        std::istringstream blocks(tile_data);
+        array<int, MAX_NO_TILE_IDXS> tile_internal{};
+        istringstream blocks(tile_data);
         auto idx_id{0};
-        for (std::string temptiledata; std::getline(
+        for (string temptiledata; getline(
                  blocks, temptiledata, ':') /*&& idx_id < MAX_NO_TILE_IDXS*/;
              idx_id++) {
           switch (idx_id) {
           case IDX_TILE_VALUE:
-            std::get<IDX_TILE_VALUE>(tile_internal) = std::stoi(temptiledata);
+            get<IDX_TILE_VALUE>(tile_internal) = stoi(temptiledata);
             break;
           case IDX_TILE_BLOCKED:
-            std::get<IDX_TILE_BLOCKED>(tile_internal) = std::stoi(temptiledata);
+            get<IDX_TILE_BLOCKED>(tile_internal) = stoi(temptiledata);
             break;
           default:
-            std::cout << "ERROR: [tile_processed_counter: "
+            cout << "ERROR: [tile_processed_counter: "
                       << tile_processed_counter
                       << "]: Read past MAX_NO_TILE_IDXS! (idx no:"
                       << MAX_NO_TILE_IDXS << ")\n";
@@ -113,36 +115,36 @@ process_file_tile_string_data(std::vector<std::string> buf) {
         }
         tile_processed_counter++;
         const unsigned long long tile_value =
-            std::get<IDX_TILE_VALUE>(tile_internal);
-        const bool tile_blocked = std::get<IDX_TILE_BLOCKED>(tile_internal);
+            get<IDX_TILE_VALUE>(tile_internal);
+        const bool tile_blocked = get<IDX_TILE_BLOCKED>(tile_internal);
         return tile_t{tile_value, tile_blocked};
       };
-  std::transform(std::begin(buf), std::end(buf), std::back_inserter(result_buf),
+  transform(begin(buf), end(buf), back_inserter(result_buf),
                  prime_tile_data);
   return result_buf;
 }
 
 // TODO: Refactor and combine to one "gameboard" loader function!
-std::tuple<bool, std::tuple<unsigned long long, long long>>
-get_and_process_game_stats_string_data(std::istream &stats_file) {
+tuple<bool, tuple<unsigned long long, long long>>
+get_and_process_game_stats_string_data(istream &stats_file) {
   if (stats_file) {
     unsigned long long score;
     long long moveCount;
-    for (std::string tempLine; std::getline(stats_file, tempLine);) {
+    for (string tempLine; getline(stats_file, tempLine);) {
       enum GameStatsFieldIndex {
         IDX_GAME_SCORE_VALUE,
         IDX_GAME_MOVECOUNT,
         MAX_NO_GAME_STATS_IDXS
       };
-      std::istringstream line(tempLine);
+      istringstream line(tempLine);
       auto idx_id{0};
-      for (std::string temp; std::getline(line, temp, ':'); idx_id++) {
+      for (string temp; getline(line, temp, ':'); idx_id++) {
         switch (idx_id) {
         case IDX_GAME_SCORE_VALUE:
-          score = std::stoi(temp);
+          score = stoi(temp);
           break;
         case IDX_GAME_MOVECOUNT:
-          moveCount = std::stoi(temp) - 1;
+          moveCount = stoi(temp) - 1;
           break;
         default:
           // Error: No fields to process!
@@ -150,30 +152,30 @@ get_and_process_game_stats_string_data(std::istream &stats_file) {
         }
       }
     }
-    return std::make_tuple(true, std::make_tuple(score, moveCount));
+    return make_tuple(true, make_tuple(score, moveCount));
   }
-  return std::make_tuple(false, std::make_tuple(0, 0));
+  return make_tuple(false, make_tuple(0, 0));
 }
 
 } // namespace
 
-load_gameboard_status_t load_GameBoard_data_from_file(std::string filename) {
-  std::ifstream stateFile(filename);
+load_gameboard_status_t load_GameBoard_data_from_file(string filename) {
+  ifstream stateFile(filename);
   if (stateFile) {
     const ull savedBoardPlaySize = GetLines(filename);
     const auto file_tile_data = get_file_tile_data(stateFile);
     const auto processed_tile_data =
         process_file_tile_string_data(file_tile_data);
-    return std::make_tuple(true,
+    return make_tuple(true,
                            GameBoard(savedBoardPlaySize, processed_tile_data));
   }
-  return std::make_tuple(false, GameBoard{});
+  return make_tuple(false, GameBoard{});
 }
 
 // Output: [loadfile_ok_status, gameboard.score, gameboard.moveCount]
-std::tuple<bool, std::tuple<unsigned long long, long long>>
-load_game_stats_from_file(std::string filename) {
-  std::ifstream stats(filename);
+tuple<bool, tuple<unsigned long long, long long>>
+load_game_stats_from_file(string filename) {
+  ifstream stats(filename);
   return get_and_process_game_stats_string_data(stats);
 }
 
@@ -190,12 +192,12 @@ load_game_stats_from_file(std::string filename) {
  * @param gb The GameBoard object to be initialized with the read data.
  * @return true if the game data was successfully loaded; false otherwise.
  */
-bool load_game(std::string fileName, GameBoard& gb)
+bool load_game(string fileName, GameBoard& gb)
 {
-  std::ifstream stateFile(fileName);
+  ifstream stateFile(fileName);
   if(!stateFile.is_open())
   {
-    std::cerr << "Cannot open the file: " << fileName << std::endl;
+    cerr << "Cannot open the file: " << fileName << endl;
     return false;
   }
 
@@ -206,12 +208,12 @@ bool load_game(std::string fileName, GameBoard& gb)
   gb = GameBoard(savedBoardPlaySize, processed_tile_data);
 
   stateFile.clear();
-  stateFile.seekg(0, std::ios::beg);
+  stateFile.seekg(0, ios::beg);
 
-  std::string current_line;
-  std::string last_line;
+  string current_line;
+  string last_line;
 
-  while (std::getline(stateFile, current_line))
+  while (getline(stateFile, current_line))
   {
     if (!current_line.empty() && current_line.front() == '[')
     {
@@ -224,12 +226,12 @@ bool load_game(std::string fileName, GameBoard& gb)
   size_t colon = last_line.find(':');
   size_t closing_square_bracket = last_line.find(']');
 
-  if (opening_square_bracket != std::string::npos && colon != std::string::npos && closing_square_bracket != std::string::npos)
+  if (opening_square_bracket != string::npos && colon != string::npos && closing_square_bracket != string::npos)
   {
-    std::string score = last_line.substr(opening_square_bracket + 1, colon - opening_square_bracket - 1);
-    std::string moveCount = last_line.substr(colon + 1, closing_square_bracket - colon - 1);
-    gb.score = std::stoull(score);
-    gb.moveCount = std::stoll(moveCount) - 1;
+    string score = last_line.substr(opening_square_bracket + 1, colon - opening_square_bracket - 1);
+    string moveCount = last_line.substr(colon + 1, closing_square_bracket - colon - 1);
+    gb.score = stoull(score);
+    gb.moveCount = stoll(moveCount) - 1;
   }
 
   return true;

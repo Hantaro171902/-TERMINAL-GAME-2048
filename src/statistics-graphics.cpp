@@ -4,29 +4,31 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace std;
+
 namespace Statistics {
 namespace Graphics {
 
-std::string AskForPlayerNamePrompt() {
+string AskForPlayerNamePrompt() {
   constexpr auto score_prompt_text =
       "Please enter your name to save this score: ";
   constexpr auto sp = "  ";
-  std::ostringstream score_prompt_richtext;
+  ostringstream score_prompt_richtext;
   score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
   return score_prompt_richtext.str();
 }
 
-std::string MessageScoreSavedPrompt() {
+string MessageScoreSavedPrompt() {
   constexpr auto score_saved_text = "Score saved!";
   constexpr auto sp = "  ";
-  std::ostringstream score_saved_richtext;
+  ostringstream score_saved_richtext;
   score_saved_richtext << "\n"
                        << green << bold_on << sp << score_saved_text << bold_off
                        << def << "\n";
   return score_saved_richtext.str();
 }
 
-std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
+string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
@@ -49,24 +51,24 @@ std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
     MAX_TOTALSTATSDISPLAYDATA_INDEXES
   };
 
-  std::ostringstream stats_richtext;
+  ostringstream stats_richtext;
 
-  const auto stats_file_loaded = std::get<IDX_DATA_AVAILABLE>(tsdd);
+  const auto stats_file_loaded = get<IDX_DATA_AVAILABLE>(tsdd);
   if (stats_file_loaded) {
     constexpr auto num_of_stats_attributes_text = 5;
-    auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-    data_stats = {std::get<IDX_BEST_SCORE>(tsdd),
-                  std::get<IDX_GAME_COUNT>(tsdd),
-                  std::get<IDX_GAME_WIN_COUNT>(tsdd),
-                  std::get<IDX_TOTAL_MOVE_COUNT>(tsdd),
-                  std::get<IDX_TOTAL_DURATION>(tsdd)};
+    auto data_stats = array<string, num_of_stats_attributes_text>{};
+    data_stats = {get<IDX_BEST_SCORE>(tsdd),
+                  get<IDX_GAME_COUNT>(tsdd),
+                  get<IDX_GAME_WIN_COUNT>(tsdd),
+                  get<IDX_TOTAL_MOVE_COUNT>(tsdd),
+                  get<IDX_TOTAL_DURATION>(tsdd)};
 
     auto counter{0};
     const auto populate_stats_info = [=, &counter,
-                                      &stats_richtext](const std::string) {
-      stats_richtext << sp << "│ " << bold_on << std::left << std::setw(18)
-                     << std::begin(stats_attributes_text)[counter] << bold_off
-                     << " │ " << std::right << std::setw(11)
+                                      &stats_richtext](const string) {
+      stats_richtext << sp << "│ " << bold_on << left << setw(18)
+                     << begin(stats_attributes_text)[counter] << bold_off
+                     << " │ " << right << setw(11)
                      << data_stats[counter] << " │"
                      << "\n";
       counter++;

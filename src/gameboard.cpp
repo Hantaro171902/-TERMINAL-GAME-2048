@@ -8,14 +8,16 @@
 #include <sstream>
 #include <utility>
 
+using namespace std;
+
 namespace Game {
 
 namespace {
 
 class RandInt {
 public:
-  using clock = std::chrono::system_clock;
-  RandInt() : dist{0, std::numeric_limits<int>::max()} {
+  using clock = chrono::system_clock;
+  RandInt() : dist{0, numeric_limits<int>::max()} {
     seed(clock::now().time_since_epoch().count());
   }
   RandInt(const int low, const int high) : dist{low, high} {
@@ -25,8 +27,8 @@ public:
   void seed(const unsigned int s) { re.seed(s); }
 
 private:
-  std::minstd_rand re;
-  std::uniform_int_distribution<> dist;
+  minstd_rand re;
+  uniform_int_distribution<> dist;
 };
 
 using gameboard_data_array_t = GameBoard::gameboard_data_array_t;
@@ -35,15 +37,15 @@ enum gameboard_data_array_fields { IDX_PLAYSIZE, IDX_BOARD, MAX_NO_INDEXES };
 struct gameboard_data_point_t {
   static int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
     int x, y;
-    std::tie(x, y) = pt.get();
+    tie(x, y) = pt.get();
     return x + getPlaySizeOfGameboardDataArray(gbda) * y;
   }
 
   tile_t operator()(gameboard_data_array_t gbda, point2D_t pt) const {
-    return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
+    return get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
   }
   tile_t &operator()(gameboard_data_array_t &gbda, point2D_t pt) {
-    return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
+    return get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
   }
 };
 
@@ -75,14 +77,14 @@ bool getTileBlockedOnGameboardDataArray(gameboard_data_array_t gbda,
  * The string representation ends with a "[" character to indicate the end of the data.
  * 
  * @param gbda The game board data array to be printed.
- * @return std::string A formatted string representing the game board state.
+ * @return string A formatted string representing the game board state.
  * 
  * @note Changes in the new version:
  * - Added a "[" character at the end of the string to indicate the end of the data.
  */
-std::string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
+string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
   const int playsize = getPlaySizeOfGameboardDataArray(gbda);
-  std::ostringstream os;
+  ostringstream os;
   for (auto y = 0; y < playsize; y++) {
     for (auto x = 0; x < playsize; x++) {
       const auto current_point = point2D_t{x, y};
@@ -97,17 +99,17 @@ std::string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
 
 bool is_point_in_board_play_area(point2D_t pt, int playsize) {
   int x, y;
-  std::tie(x, y) = pt.get();
+  tie(x, y) = pt.get();
   return !(y < 0 || y > playsize - 1 || x < 0 || x > playsize - 1);
 }
 
-using delta_t = std::pair<point2D_t, point2D_t>;
+using delta_t = pair<point2D_t, point2D_t>;
 // NOTE: delta_t.first = focal point, delta_t.second = offset distance
 
 bool check_recursive_offset_in_game_bounds(delta_t dt_point, int playsize) {
   int x, y, x2, y2;
-  std::tie(x, y) = dt_point.first.get();
-  std::tie(x2, y2) = dt_point.second.get();
+  tie(x, y) = dt_point.first.get();
+  tie(x2, y2) = dt_point.second.get();
   const auto positive_direction = (y2 + x2 == 1);
   const auto negative_direction = (y2 + x2 == -1);
   const auto is_positive_y_direction_flagged = (y2 == 1);
@@ -124,13 +126,13 @@ gameboard_data_array_t
 unblockTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
   using tile_data_array_t = GameBoard::tile_data_array_t;
   auto new_board_data_array =
-      tile_data_array_t(std::get<IDX_BOARD>(gbda).size());
-  std::transform(std::begin(std::get<IDX_BOARD>(gbda)),
-                 std::end(std::get<IDX_BOARD>(gbda)),
-                 std::begin(new_board_data_array), [](const tile_t t) {
+      tile_data_array_t(get<IDX_BOARD>(gbda).size());
+  transform(begin(get<IDX_BOARD>(gbda)),
+                 end(get<IDX_BOARD>(gbda)),
+                 begin(new_board_data_array), [](const tile_t t) {
                    return tile_t{t.value, false};
                  });
-  return gameboard_data_array_t{std::get<IDX_PLAYSIZE>(gbda),
+  return gameboard_data_array_t{get<IDX_PLAYSIZE>(gbda),
                                 new_board_data_array};
 }
 
@@ -161,18 +163,18 @@ bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
     };
 
     return ((current_point_value == 0u) ||
-            std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
+            any_of(begin(list_of_offsets), end(list_of_offsets),
                         offset_in_range_with_same_value));
   };
-  return std::any_of(std::begin(std::get<IDX_BOARD>(gbda)),
-                     std::end(std::get<IDX_BOARD>(gbda)), can_move_to_offset);
+  return any_of(begin(get<IDX_BOARD>(gbda)),
+                     end(get<IDX_BOARD>(gbda)), can_move_to_offset);
 }
 
-std::vector<size_t>
+vector<size_t>
 collectFreeTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
-  std::vector<size_t> freeTiles;
+  vector<size_t> freeTiles;
   auto index_counter{0};
-  for (const auto t : std::get<IDX_BOARD>(gbda)) {
+  for (const auto t : get<IDX_BOARD>(gbda)) {
     if (!t.value) {
       freeTiles.push_back(index_counter);
     }
@@ -241,7 +243,7 @@ enum class COLLASPE_OR_SHIFT_T {
   MAX_NUM_OF_ACTIONS
 };
 
-using bool_collaspe_shift_t = std::tuple<bool, COLLASPE_OR_SHIFT_T>;
+using bool_collaspe_shift_t = tuple<bool, COLLASPE_OR_SHIFT_T>;
 
 bool_collaspe_shift_t
 collasped_or_shifted_tilesOnGameboardDataArray(gameboard_data_array_t gbda,
@@ -263,18 +265,18 @@ collasped_or_shifted_tilesOnGameboardDataArray(gameboard_data_array_t gbda,
   const auto action_taken = (do_collapse || do_shift);
 
   if (do_collapse) {
-    return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_COLLASPE);
+    return make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_COLLASPE);
   } else if (do_shift) {
-    return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_SHIFT);
+    return make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_SHIFT);
   }
-  return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_NONE);
+  return make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_NONE);
 }
 
 bool updateGameBoardStats(GameBoard &gb, ull target_tile_value) {
   gb.score += target_tile_value;
 
   //  Discover the largest tile value on the gameboard...
-  gb.largestTile = std::max(gb.largestTile, target_tile_value);
+  gb.largestTile = max(gb.largestTile, target_tile_value);
 
   //  Discover the winning tile value on the gameboard...
   if (!hasWonOnGameboard(gb)) {
@@ -289,7 +291,7 @@ bool updateGameBoardStats(GameBoard &gb, ull target_tile_value) {
 void moveOnGameboard(GameBoard &gb, delta_t dt_point) {
   auto did_gameboard_collaspe_or_shift_anything = bool{};
   auto action_was_taken = COLLASPE_OR_SHIFT_T::ACTION_NONE;
-  std::tie(did_gameboard_collaspe_or_shift_anything, action_was_taken) =
+  tie(did_gameboard_collaspe_or_shift_anything, action_was_taken) =
       collasped_or_shifted_tilesOnGameboardDataArray(gb.gbda, dt_point);
   if (did_gameboard_collaspe_or_shift_anything) {
     gb.moved = true;
@@ -306,7 +308,7 @@ void moveOnGameboard(GameBoard &gb, delta_t dt_point) {
   if (check_recursive_offset_in_game_bounds(
           dt_point, getPlaySizeOfGameboardDataArray(gb.gbda))) {
     moveOnGameboard(
-        gb, std::make_pair(dt_point.first + dt_point.second, dt_point.second));
+        gb, make_pair(dt_point.first + dt_point.second, dt_point.second));
   }
 }
 
@@ -317,7 +319,7 @@ void doTumbleTilesUpOnGameboard(GameBoard &gb) {
     while (y < playsize) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, -1}));
+        moveOnGameboard(gb, make_pair(current_point, point2D_t{0, -1}));
       }
       y++;
     }
@@ -331,7 +333,7 @@ void doTumbleTilesDownOnGameboard(GameBoard &gb) {
     while (y >= 0) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, 1}));
+        moveOnGameboard(gb, make_pair(current_point, point2D_t{0, 1}));
       }
       y--;
     }
@@ -345,7 +347,7 @@ void doTumbleTilesLeftOnGameboard(GameBoard &gb) {
     while (x < playsize) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{-1, 0}));
+        moveOnGameboard(gb, make_pair(current_point, point2D_t{-1, 0}));
       }
       x++;
     }
@@ -359,7 +361,7 @@ void doTumbleTilesRightOnGameboard(GameBoard &gb) {
     while (x >= 0) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{1, 0}));
+        moveOnGameboard(gb, make_pair(current_point, point2D_t{1, 0}));
       }
       x--;
     }
@@ -376,7 +378,7 @@ GameBoard::GameBoard(ull playsize, tile_data_array_t prempt_board)
 }
 
 size_t getPlaySizeOfGameboardDataArray(gameboard_data_array_t gbda) {
-  return std::get<IDX_PLAYSIZE>(gbda);
+  return get<IDX_PLAYSIZE>(gbda);
 }
 
 tile_t getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
@@ -424,7 +426,7 @@ void tumbleTilesRightOnGameboard(GameBoard &gb) {
   doTumbleTilesRightOnGameboard(gb);
 }
 
-std::string printStateOfGameBoard(GameBoard gb) {
+string printStateOfGameBoard(GameBoard gb) {
   return printStateOfGameBoardDataArray(gb.gbda);
 }
 

@@ -16,6 +16,8 @@
 #include <sstream>
 #include <random> // Required for generating random numbers/integers in the RemoveTiles() function.
 
+
+using namespace std;
 namespace Game {
 namespace {
 enum Directions { UP, DOWN, RIGHT, LEFT };
@@ -33,9 +35,9 @@ enum GameStatusFlag {
   MAX_NO_GAME_STATUS_FLAGS
 };
 
-using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
+using gamestatus_t = array<bool, MAX_NO_GAME_STATUS_FLAGS>;
 
-using gamestatus_gameboard_t = std::tuple<gamestatus_t, GameBoard>;
+using gamestatus_gameboard_t = tuple<gamestatus_t, GameBoard>;
 
 /**
  * @brief Processes the game logic for the current game state.
@@ -50,7 +52,7 @@ using gamestatus_gameboard_t = std::tuple<gamestatus_t, GameBoard>;
 gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
   gamestatus_t gamestatus;
   GameBoard gb;
-  std::tie(gamestatus, gb) = gsgb;
+  tie(gamestatus, gb) = gsgb;
   unblockTilesOnGameboard(gb);
   if (gb.moved) {
     addTileOnGameboard(gb);
@@ -68,8 +70,8 @@ gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
     if(gamestatus[FLAG_TILES_REMOVED] == false)
     {
       char input;
-      std::cout << "You lose. Do you want to remove random tiles (Y/N) ?" << std::endl;
-      std::cin >> input;
+      cout << "You lose. Do you want to remove random tiles (Y/N) ?" << endl;
+      cin >> input;
 
       if(input == 'Y' || input == 'y')
       {
@@ -83,7 +85,7 @@ gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
       }
       else 
       {
-        std::cout << "Invalid input." << std::endl;
+        cout << "Invalid input." << endl;
       }
     }
     else
@@ -91,7 +93,7 @@ gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
       gamestatus[FLAG_END_GAME] = true;
     }
   }
-  return std::make_tuple(gamestatus, gb);
+  return make_tuple(gamestatus, gb);
 }
 
 using competition_mode_t = bool;
@@ -103,22 +105,22 @@ make_scoreboard_display_data(ull bestScore, competition_mode_t cm,
   const auto comp_mode = cm;
   const auto movecount = MoveCountOnGameBoard(gb);
   const auto scdd =
-      std::make_tuple(comp_mode, std::to_string(gameboard_score),
-                      std::to_string(tempBestScore), std::to_string(movecount));
+      make_tuple(comp_mode, to_string(gameboard_score),
+                      to_string(tempBestScore), to_string(movecount));
   return scdd;
 };
 
 Graphics::input_controls_display_data_t
 make_input_controls_display_data(gamestatus_t gamestatus) {
-  const auto icdd = std::make_tuple(gamestatus[FLAG_ENDLESS_MODE],
+  const auto icdd = make_tuple(gamestatus[FLAG_ENDLESS_MODE],
                                     gamestatus[FLAG_QUESTION_STAY_OR_QUIT]);
   return icdd;
 };
 
-std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
+string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
   using namespace Graphics;
 
-  std::ostringstream str_os;
+  ostringstream str_os;
   DrawOnlyWhen(str_os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
                QuestionEndOfWinningGamePrompt);
   return str_os.str();
@@ -127,7 +129,7 @@ std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
 // NOTE: current_game_session_t
 // : (bestScore, is_competition_mode, gamestatus, gamePlayBoard)
 using current_game_session_t =
-    std::tuple<ull, competition_mode_t, gamestatus_t, GameBoard>;
+    tuple<ull, competition_mode_t, gamestatus_t, GameBoard>;
 enum tuple_cgs_t_idx {
   IDX_BESTSCORE,
   IDX_COMP_MODE,
@@ -135,17 +137,17 @@ enum tuple_cgs_t_idx {
   IDX_GAMEBOARD
 };
 
-std::string drawGraphics(current_game_session_t cgs) {
+string drawGraphics(current_game_session_t cgs) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
   using tup_idx = tuple_cgs_t_idx;
-  const auto bestScore = std::get<tup_idx::IDX_BESTSCORE>(cgs);
-  const auto comp_mode = std::get<tup_idx::IDX_COMP_MODE>(cgs);
-  const auto gb = std::get<tup_idx::IDX_GAMEBOARD>(cgs);
-  const auto gamestatus = std::get<tup_idx::IDX_GAMESTATUS>(cgs);
+  const auto bestScore = get<tup_idx::IDX_BESTSCORE>(cgs);
+  const auto comp_mode = get<tup_idx::IDX_COMP_MODE>(cgs);
+  const auto gb = get<tup_idx::IDX_GAMEBOARD>(cgs);
+  const auto gamestatus = get<tup_idx::IDX_GAMESTATUS>(cgs);
 
-  std::ostringstream str_os;
+  ostringstream str_os;
 
   // 1. Clear screen
   clearScreen();
@@ -197,7 +199,7 @@ gamestatus_t update_one_shot_display_flags(gamestatus_t gamestatus) {
   return gamestatus;
 }
 
-using bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
+using bool_gamestatus_t = tuple<bool, gamestatus_t>;
 /**
  * @brief Processes non-standard input commands and updates the game status accordingly.
  * 
@@ -236,10 +238,10 @@ bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
     is_invalid_keycode = false;
     break;
   }
-  return std::make_tuple(is_invalid_keycode, gamestatus);
+  return make_tuple(is_invalid_keycode, gamestatus);
 }
 using intendedmove_gamestatus_t =
-    std::tuple<Input::intendedmove_t, gamestatus_t>;
+    tuple<Input::intendedmove_t, gamestatus_t>;
 intendedmove_gamestatus_t
 receive_agent_input(Input::intendedmove_t intendedmove,
                     gamestatus_t gamestatus) {
@@ -255,14 +257,14 @@ receive_agent_input(Input::intendedmove_t intendedmove,
                                           check_input_wasd(c, intendedmove) &&
                                           check_input_vim(c, intendedmove);
     bool is_invalid_special_keypress_code;
-    std::tie(is_invalid_special_keypress_code, gamestatus) =
+    tie(is_invalid_special_keypress_code, gamestatus) =
         check_input_other(c, gamestatus);
     if (is_invalid_keypress_code && is_invalid_special_keypress_code) {
       gamestatus[FLAG_ONE_SHOT] = true;
       gamestatus[FLAG_INPUT_ERROR] = true;
     }
   }
-  return std::make_tuple(intendedmove, gamestatus);
+  return make_tuple(intendedmove, gamestatus);
 }
 
 GameBoard decideMove(Directions d, GameBoard gb) {
@@ -286,7 +288,7 @@ GameBoard decideMove(Directions d, GameBoard gb) {
   return gb;
 }
 
-using bool_gameboard_t = std::tuple<bool, GameBoard>;
+using bool_gameboard_t = tuple<bool, GameBoard>;
 bool_gameboard_t process_agent_input(Input::intendedmove_t intendedmove,
                                      GameBoard gb) {
   using namespace Input;
@@ -303,19 +305,19 @@ bool_gameboard_t process_agent_input(Input::intendedmove_t intendedmove,
     gb = decideMove(DOWN, gb);
   }
 
-  return std::make_tuple(true, gb);
+  return make_tuple(true, gb);
 }
 
 bool check_input_check_to_end_game(char c) {
   using namespace Input::Keypress::Code;
-  switch (std::toupper(c)) {
+  switch (toupper(c)) {
   case CODE_HOTKEY_CHOICE_NO:
     return true;
   }
   return false;
 }
 
-bool continue_playing_game(std::istream &in_os) {
+bool continue_playing_game(istream &in_os) {
   char letter_choice;
   in_os >> letter_choice;
   if (check_input_check_to_end_game(letter_choice)) {
@@ -342,11 +344,11 @@ bool continue_playing_game(std::istream &in_os) {
 bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
   gamestatus_t gamestatus;
   GameBoard gb;
-  std::tie(gamestatus, gb) = gsgb;
+  tie(gamestatus, gb) = gsgb;
   auto loop_again{true};
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (gamestatus[FLAG_WIN]) {
-      if (continue_playing_game(std::cin)) {
+      if (continue_playing_game(cin)) {
         gamestatus[FLAG_ENDLESS_MODE] = true;
         gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = false;
         gamestatus[FLAG_WIN] = false;
@@ -360,61 +362,61 @@ bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
     loop_again = false;
   }
   if (gamestatus[FLAG_SAVED_GAME]) {
-    std::cout << "Please enter the filename to save the game state" << std::endl;
-    std::string filename;
-    std::cin >> filename;
+    cout << "Please enter the filename to save the game state" << endl;
+    string filename;
+    cin >> filename;
     Saver::saveGamePlayState(gb, filename);
   }
 
   // New loop cycle: reset question asking event trigger
   gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE] = false;
-  return std::make_tuple(loop_again, gamestatus);
+  return make_tuple(loop_again, gamestatus);
 }
 
-using bool_current_game_session_t = std::tuple<bool, current_game_session_t>;
+using bool_current_game_session_t = tuple<bool, current_game_session_t>;
 bool_current_game_session_t soloGameLoop(current_game_session_t cgs) {
   using namespace Input;
   using tup_idx = tuple_cgs_t_idx;
   const auto gamestatus =
-      std::addressof(std::get<tup_idx::IDX_GAMESTATUS>(cgs));
-  const auto gb = std::addressof(std::get<tup_idx::IDX_GAMEBOARD>(cgs));
+      addressof(get<tup_idx::IDX_GAMESTATUS>(cgs));
+  const auto gb = addressof(get<tup_idx::IDX_GAMEBOARD>(cgs));
 
-  std::tie(*gamestatus, *gb) =
-      process_gamelogic(std::make_tuple(*gamestatus, *gb));
+  tie(*gamestatus, *gb) =
+      process_gamelogic(make_tuple(*gamestatus, *gb));
 
-  DrawAlways(std::cout, DataSuppliment(cgs, drawGraphics));
+  DrawAlways(cout, DataSuppliment(cgs, drawGraphics));
   *gamestatus = update_one_shot_display_flags(*gamestatus);
 
   intendedmove_t player_intendedmove{};
-  std::tie(player_intendedmove, *gamestatus) =
+  tie(player_intendedmove, *gamestatus) =
       receive_agent_input(player_intendedmove, *gamestatus);
-  std::tie(std::ignore, *gb) = process_agent_input(player_intendedmove, *gb);
+  tie(ignore, *gb) = process_agent_input(player_intendedmove, *gb);
 
   bool loop_again;
-  std::tie(loop_again, *gamestatus) =
-      process_gameStatus(std::make_tuple(*gamestatus, *gb));
-  return std::make_tuple(loop_again, cgs);
+  tie(loop_again, *gamestatus) =
+      process_gameStatus(make_tuple(*gamestatus, *gb));
+  return make_tuple(loop_again, cgs);
 }
 
 Graphics::end_screen_display_data_t
 make_end_screen_display_data(gamestatus_t world_gamestatus) {
-  const auto esdd = std::make_tuple(world_gamestatus[FLAG_WIN],
+  const auto esdd = make_tuple(world_gamestatus[FLAG_WIN],
                                     world_gamestatus[FLAG_ENDLESS_MODE]);
   return esdd;
 };
 
-std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
+string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
   using tup_idx = tuple_cgs_t_idx;
-  const auto bestScore = std::get<tup_idx::IDX_BESTSCORE>(finalgamestatus);
-  const auto comp_mode = std::get<tup_idx::IDX_COMP_MODE>(finalgamestatus);
-  const auto gb = std::get<tup_idx::IDX_GAMEBOARD>(finalgamestatus);
+  const auto bestScore = get<tup_idx::IDX_BESTSCORE>(finalgamestatus);
+  const auto comp_mode = get<tup_idx::IDX_COMP_MODE>(finalgamestatus);
+  const auto gb = get<tup_idx::IDX_GAMEBOARD>(finalgamestatus);
   const auto end_gamestatus =
-      std::get<tup_idx::IDX_GAMESTATUS>(finalgamestatus);
+      get<tup_idx::IDX_GAMESTATUS>(finalgamestatus);
 
-  std::ostringstream str_os;
+  ostringstream str_os;
 
   // 1. Clear screen
   clearScreen();
@@ -456,15 +458,15 @@ GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
                           GameBoard gb) {
   auto loop_again{true};
   auto currentgamestatus =
-      std::make_tuple(currentBestScore, cm, gamestatus_t{}, gb);
+      make_tuple(currentBestScore, cm, gamestatus_t{}, gb);
   // Monitor the loop to check if the current state is still set to GAME
   // If not, then the M key was pressed, setting the current state to MENU
   // Thus, we return to the menu
   while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) || (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
-    std::tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
+    tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
   }
 
-  DrawAlways(std::cout,
+  DrawAlways(cout,
              DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
   return gb;
 }
@@ -482,7 +484,7 @@ Scoreboard::Score make_finalscore_from_game_session(double duration,
 
 void DoPostGameSaveStuff(Scoreboard::Score finalscore, competition_mode_t cm) {
   if (cm) {
-    Statistics::CreateFinalScoreAndEndGameDataFile(std::cout, std::cin,
+    Statistics::CreateFinalScoreAndEndGameDataFile(cout, cin,
                                                    finalscore);
   }
 }
@@ -500,10 +502,10 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
     addTileOnGameboard(gb);
   }
 
-  const auto startTime = std::chrono::high_resolution_clock::now();
+  const auto startTime = chrono::high_resolution_clock::now();
   gb = endlessGameLoop(bestScore, is_competition_mode, gb);
-  const auto finishTime = std::chrono::high_resolution_clock::now();
-  const std::chrono::duration<double> elapsed = finishTime - startTime;
+  const auto finishTime = chrono::high_resolution_clock::now();
+  const chrono::duration<double> elapsed = finishTime - startTime;
   const auto duration = elapsed.count();
 
   if (is_this_a_new_game) {
@@ -524,7 +526,7 @@ void startGame() {
  * 
  * @param filename The name of the file containing the saved game to load.
  */
-void continueGame(const std::string& filename) {
+void continueGame(const string& filename) {
   PreGameSetup::ContinueOldGame(filename);
 }
 
@@ -539,11 +541,11 @@ void continueGame(const std::string& filename) {
  */
 void removeTiles(GameBoard& gb) {
     // Seed with a real random value, if available
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    random_device rd;
+    mt19937 gen(rd());
 
     auto& [playsize, tiles] = gb.gbda;
-    std::uniform_int_distribution<> dis(0, tiles.size() - 1);
+    uniform_int_distribution<> dis(0, tiles.size() - 1);
 
     int tiles_to_remove = 2;
     while (tiles_to_remove > 0) {

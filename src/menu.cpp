@@ -14,7 +14,9 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <filesystem> //To use std::filestream
+#include <filesystem> //To use filestream
+
+using namespace std;
 
 mainmenustatus_t mainmenustatus{};
 
@@ -25,19 +27,19 @@ mainmenustatus_t mainmenustatus{};
  * as a list of strings. It checks if the directory exists before attempting to list the files.
  * 
  * @param directory The directory to search for saved game state files.
- * @return std::vector<std::string> A vector containing the names of the saved game state files.
+ * @return vector<string> A vector containing the names of the saved game state files.
  */
-std::vector<std::string> listSavedGameStates(const std::string& directory)
+vector<string> listSavedGameStates(const string& directory)
 {
-  std::vector<std::string> gameStates;
+  vector<string> gameStates;
 
-  if(!std::filesystem::exists(directory))
+  if(!filesystem::exists(directory))
   {
-    std::cout << "Directory does not exists." << std::endl;
+    cout << "Directory does not exists." << endl;
     return gameStates;
   }
 
-  for(auto& data : std::filesystem::directory_iterator(directory))
+  for(auto& data : filesystem::directory_iterator(directory))
   {
     if(data.is_regular_file())
     {
@@ -55,30 +57,30 @@ std::vector<std::string> listSavedGameStates(const std::string& directory)
  * If no game states are found, or if the user's choice is invalid, appropriate messages are displayed.
  * 
  * @param gamestate A vector containing the names of available game states.
- * @return std::string The name of the chosen game state, or an empty string if the choice is invalid.
+ * @return string The name of the chosen game state, or an empty string if the choice is invalid.
  */
-std::string chooseGameState(const std::vector<std::string>& gamestate)
+string chooseGameState(const vector<string>& gamestate)
 {
   if(gamestate.empty())
   {
-    std::cout << "No saved games found." << std::endl;
+    cout << "No saved games found." << endl;
     return "";
   }
 
-  std::cout << "Saved games are:" << std::endl;
-  for (std::size_t i = 0; i < gamestate.size(); i++)
+  cout << "Saved games are:" << endl;
+  for (size_t i = 0; i < gamestate.size(); i++)
   {
-    std::cout << i + 1 << ". " << gamestate[i] << std::endl;
+    cout << i + 1 << ". " << gamestate[i] << endl;
   }
 
   unsigned int index;
-  std::cout << "Choose game state:" << std::endl;
-  std::cout << std::endl;
-  std::cin >> index;
+  cout << "Choose game state:" << endl;
+  cout << endl;
+  cin >> index;
 
   if(index < 1 || index > gamestate.size())
   {
-    std::cout << "Invalid choice." << std::endl;
+    cout << "Invalid choice." << endl;
     return "";
   }
 
@@ -107,15 +109,15 @@ void startGame() {
  */
 void continueGame()
 {
-  std::string directory_state = "../data/SavedGameFiles/";
-  std::string file_gb_state = chooseGameState(listSavedGameStates(directory_state));
+  string directory_state = "../data/SavedGameFiles/";
+  string file_gb_state = chooseGameState(listSavedGameStates(directory_state));
   if (!file_gb_state.empty())
   {
     Game::continueGame(directory_state + file_gb_state);
   }
   else
   {
-    std::cout << "The file is empty" << std::endl;
+    cout << "The file is empty" << endl;
   }
 }
 
@@ -125,22 +127,22 @@ make_scoreboard_display_data_list() {
   auto scoreList = Scoreboard::Scoreboard_t{};
   // bool loaded_scorelist;
   // Warning: Does not care if file exists or not!
-  std::tie(std::ignore, scoreList) =
+  tie(ignore, scoreList) =
       Scoreboard::loadFromFileScore("../data/scores.txt");
 
   auto counter{1};
   const auto convert_to_display_list_t = [&counter](const Scoreboard::Score s) {
-    const auto data_stats = std::make_tuple(
-        std::to_string(counter), s.name, std::to_string(s.score),
-        s.win ? "Yes" : "No", std::to_string(s.moveCount),
-        std::to_string(s.largestTile), secondsFormat(s.duration));
+    const auto data_stats = make_tuple(
+        to_string(counter), s.name, to_string(s.score),
+        s.win ? "Yes" : "No", to_string(s.moveCount),
+        to_string(s.largestTile), secondsFormat(s.duration));
     counter++;
     return data_stats;
   };
 
   auto scoreboard_display_list = scoreboard_display_data_list_t{};
-  std::transform(std::begin(scoreList), std::end(scoreList),
-                 std::back_inserter(scoreboard_display_list),
+  transform(begin(scoreList), end(scoreList),
+                 back_inserter(scoreboard_display_list),
                  convert_to_display_list_t);
   return scoreboard_display_list;
 };
@@ -149,13 +151,13 @@ Statistics::Graphics::total_stats_display_data_t
 make_total_stats_display_data() {
   Statistics::total_game_stats_t stats;
   bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) =
+  tie(stats_file_loaded, stats) =
       Statistics::loadFromFileStatistics("../data/statistics.txt");
 
-  const auto tsdd = std::make_tuple(
-      stats_file_loaded, std::to_string(stats.bestScore),
-      std::to_string(stats.gameCount), std::to_string(stats.winCount),
-      std::to_string(stats.totalMoveCount), secondsFormat(stats.totalDuration));
+  const auto tsdd = make_tuple(
+      stats_file_loaded, to_string(stats.bestScore),
+      to_string(stats.gameCount), to_string(stats.winCount),
+      to_string(stats.totalMoveCount), secondsFormat(stats.totalDuration));
   return tsdd;
 };
 
@@ -167,15 +169,15 @@ void showScores() {
   const auto tsdd = make_total_stats_display_data();
 
   clearScreen();
-  DrawAlways(std::cout, AsciiArt2048);
-  DrawAlways(std::cout, DataSuppliment(sbddl, ScoreboardOverlay));
-  DrawAlways(std::cout, DataSuppliment(tsdd, TotalStatisticsOverlay));
-  std::cout << std::flush;
+  DrawAlways(cout, AsciiArt2048);
+  DrawAlways(cout, DataSuppliment(sbddl, ScoreboardOverlay));
+  DrawAlways(cout, DataSuppliment(tsdd, TotalStatisticsOverlay));
+  cout << flush;
   pause_for_keypress();
   ::Menu::startMenu();
 }
 
-void receive_input_flags(std::istream &in_os) {
+void receive_input_flags(istream &in_os) {
   // Reset ErrornousChoice flag...
   FlagInputErrornousChoice = bool{};
   char c;
@@ -219,11 +221,11 @@ bool soloLoop() {
   // No choice in Menu selected, reset all flags...
   mainmenustatus = mainmenustatus_t{};
   clearScreen();
-  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
-  DrawAlways(std::cout,
+  DrawAlways(cout, Game::Graphics::AsciiArt2048);
+  DrawAlways(cout,
              DataSuppliment(FlagInputErrornousChoice,
                             Game::Graphics::Menu::MainMenuGraphicsOverlay));
-  receive_input_flags(std::cin);
+  receive_input_flags(cin);
   process_MainMenu();
   return FlagInputErrornousChoice;
 }
